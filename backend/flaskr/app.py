@@ -127,7 +127,7 @@ def create_app(test_config=None):
   def add_question():
     try:
       # formData = Question(request.get_json().get('question'),request.get_json().get('answer'),request.get_json().get('category'),request.get_json().get('difficulty'))
-      formData = Question('','',0,0)
+      formData = Question('', '', 0, 0)
       formData.question = request.get_json().get('question')
       formData.category = request.get_json().get('category')
       formData.answer = request.get_json().get('answer')
@@ -190,7 +190,7 @@ def create_app(test_config=None):
   def getQuestionsOfCategory(id):
     questions = Question.getQuestionsAndCategories({}).filter(Category.id == id).all()
     currentCategory = Category.query.get(id)
-    #print(questions)
+    # print(questions)
 
     formated_questions = []
     for q in questions:
@@ -203,7 +203,7 @@ def create_app(test_config=None):
     })
 
     # formated_questions = [q.format() for q in questions]
-    #print(formated_questions)
+    # print(formated_questions)
 
     return jsonify({
       'success':True,
@@ -230,12 +230,12 @@ def create_app(test_config=None):
 
     previousQuestions = request.get_json().get('previous_questions')
     quizCategory = request.get_json().get('quiz_category')
-    print(previousQuestions)
     print(quizCategory)
 
-    questions = Question.getQuestionsAndCategories({}).filter(Category.id == quizCategory['id']).all()
-    
-    print(questions)
+    if(quizCategory['id'] == 0):
+       questions = Question.getQuestionsAndCategories({}).all()
+    else:
+       questions = Question.getQuestionsAndCategories({}).filter(Category.id == quizCategory['id']).all()
     
     formated_questions = []
     for q in questions:
@@ -248,17 +248,36 @@ def create_app(test_config=None):
     })
 
     question = random.choice(formated_questions)
-    print(formated_questions)
+
+    canSendit = True
+
+    print(previousQuestions)
     print(question)
-    #for q in previousQuestions:
 
-   
-    # formated_questions = [q.format() for q in questions]
+    # count = len(formated_questions)
+    # while count > 0:
+    #   for q in previousQuestions:
+    #     question = random.choice(formated_questions)
+    #     count = count - 1
+    #     if(q == question['id']):
+    #       canSendit = False
 
-    return jsonify({
-      'success':True,
-      'currentQuestion':{}
-      })
+    for q in previousQuestions:
+      if(q == question['id']):
+        canSendit = False
+
+    if(canSendit):
+      return jsonify({
+        'success':True,
+        'question':question
+        })
+    else:
+      return jsonify({
+        'success':False,
+        'question':'',
+        'message':'You answered all questions'
+        })
+
   '''
   @TODO: 
   Create error handlers for all expected errors 

@@ -71,6 +71,8 @@ class Question(db.Model):
       'category': self.category,
       'difficulty': self.difficulty
     }
+  def __eq__(self, other):
+        return self.id == other.id
 
 '''
 Category
