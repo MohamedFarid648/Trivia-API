@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS ,cross_origin
+from flask_cors import CORS , cross_origin
 import random
 import sys
 
@@ -12,26 +12,24 @@ QUESTIONS_PER_PAGE = 10
 
 def create_app(test_config=None):
   # create and configure the app  
-  app = Flask(__name__, instance_relative_config=True)
-  CORS(app)
-  cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-  app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+  app = Flask(__name__)
+  # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
   setup_db(app)
+  cors = CORS(app, resources={"*": {"origins": "*"}})
   
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
 
-
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
   '''
 
-
   # CORS Headers 
   @app.after_request
   def after_request(response):
+    # response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
     return response
@@ -40,13 +38,6 @@ def create_app(test_config=None):
     Create an endpoint to handle GET requests 
     for all available categories.
     '''
-
-
-  @app.route("/api/hello")
-  @cross_origin()
-  def get_greeting():
-      return jsonify({'message':'Hello, World!'})
-
 
   '''
   @TODO: 
@@ -62,12 +53,11 @@ def create_app(test_config=None):
   Clicking on the page numbers should update the questions. 
   '''
 
-
-
-  @app.route('/api/questions',methods=['GET'])
+  @app.route('/api/questions', methods=['GET'])
+  @cross_origin()
   def getQuestions():
     page = request.args.get('page', 1, type=int)
-    #2 elements for every page
+    # 2 elements for every page
     start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
     questions = Question.query.all()
@@ -76,16 +66,16 @@ def create_app(test_config=None):
     formated_questions = [q.format() for q in questions]
     formated_category = [c.format() for c in categories]
 
-    print(page)
     return jsonify({
       'success':True,
       'questions':formated_questions[start:end],
-      'total_questions':len(questions),
+      'total_questions':len(formated_questions),
       'categories':formated_category,
-      #'currentCategory':
+       'currentCategory':{}
       })
 
-  @app.route('/api/categories',methods=['GET'])
+  @app.route('/api/categories', methods=['GET'])
+  @cross_origin()
   def getCategories():
     categories = Category.query.all()
     formated_category = [c.format() for c in categories]
@@ -95,7 +85,7 @@ def create_app(test_config=None):
       'total_categories':len(categories),
       'categories':formated_category,
       })
-
+ 
   '''
   @TODO: 
   Create an endpoint to DELETE question using a question ID. 
@@ -103,20 +93,23 @@ def create_app(test_config=None):
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
-  @app.route('/api/question/<int:question_id>', methods=['DELETE'])
-  def delete_question(question_id):
-    question = Question.query.filter_by(id=question_id).one_or_none()
+
+  @app.route('/api/question/<int:id>', methods=['DELETE'])
+  @cross_origin()
+  def delete_question(id):
+    question = Question.query.filter_by(id=id).one_or_none()
 
     if(question is None):
         abort(404)
 
     try:
-        Question.delete(question)
+        question.delete(question)
         return jsonify({
               'success':True,
         })
-    except:
-        abort(422)
+    except Exception as e:
+        # abort(422)
+        print(e)
  
   '''
   @TODO: 
@@ -129,6 +122,33 @@ def create_app(test_config=None):
   of the questions list in the "List" tab.  
   '''
 
+  @app.route('/api/question', methods=['POST'])
+  @cross_origin()
+  def add_question():
+    try:
+      # formData = Question(request.get_json().get('question'),request.get_json().get('answer'),request.get_json().get('category'),request.get_json().get('difficulty'))
+      formData = Question('','',0,0)
+      formData.question = request.get_json().get('question')
+      formData.category = request.get_json().get('category')
+      formData.answer = request.get_json().get('answer')
+      formData.difficulty = request.get_json().get('difficulty')
+      print(formData.question)
+
+      if(formData.question and formData.answer and formData.category and formData.difficulty):
+        Question.insert(formData)
+        return jsonify({
+          'success':True
+        })  
+      else:
+         return jsonify({
+          'success':False,
+          'message':'Check All required Fields'
+
+        })
+    except Exception as e:
+      print(e)
+      abort(422)
+
   '''
   @TODO: 
   Create a POST endpoint to get questions based on a search term. 
@@ -140,6 +160,22 @@ def create_app(test_config=None):
   Try using the word "title" to start. 
   '''
 
+  @app.route('/api/questions/search', methods=['POST'])
+  @cross_origin()
+  def search_artists():
+
+    searchTerm = request.get_json().get('searchTerm')
+    res = Question.query.filter(Question.question.ilike("%" + searchTerm + "%")).all()
+  
+    formated_questions = [q.format() for q in res]
+
+    return jsonify({
+      'success':True,
+      'questions':formated_questions,
+      'total_questions':len(res),
+      'currentCategory':{}
+      })
+
   '''
   @TODO: 
   Create a GET endpoint to get questions based on category. 
@@ -148,6 +184,33 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
+
+  @app.route('/api/categories/<int:id>/questions', methods=['GET'])
+  @cross_origin()
+  def getQuestionsOfCategory(id):
+    questions = Question.getQuestionsAndCategories({}).filter(Category.id == id).all()
+    currentCategory = Category.query.get(id)
+    #print(questions)
+
+    formated_questions = []
+    for q in questions:
+      formated_questions.append({
+      'id': q[0],
+      'question': q[1],
+      'answer': q[2],
+      'category': q[3],
+      'difficulty': q[4]
+    })
+
+    # formated_questions = [q.format() for q in questions]
+    #print(formated_questions)
+
+    return jsonify({
+      'success':True,
+      'questions':formated_questions,
+      'total_questions':len(formated_questions),
+       'currentCategory':currentCategory.format()
+      })
 
   '''
   @TODO: 
@@ -161,15 +224,51 @@ def create_app(test_config=None):
   and shown whether they were correct or not. 
   '''
 
+  @app.route('/api/quizzes', methods=['POST'])
+  @cross_origin()
+  def getQuiz():
+
+    previousQuestions = request.get_json().get('previous_questions')
+    quizCategory = request.get_json().get('quiz_category')
+    print(previousQuestions)
+    print(quizCategory)
+
+    questions = Question.getQuestionsAndCategories({}).filter(Category.id == quizCategory['id']).all()
+    
+    print(questions)
+    
+    formated_questions = []
+    for q in questions:
+      formated_questions.append({
+      'id': q[0],
+      'question': q[1],
+      'answer': q[2],
+      'category': q[3],
+      'difficulty': q[4]
+    })
+
+    question = random.choice(formated_questions)
+    print(formated_questions)
+    print(question)
+    #for q in previousQuestions:
+
+   
+    # formated_questions = [q.format() for q in questions]
+
+    return jsonify({
+      'success':True,
+      'currentQuestion':{}
+      })
   '''
   @TODO: 
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
+
   @app.errorhandler(404)
   def not_found(error):
       return jsonify({
-          "success": False, 
+          "success": False,
           "error": 404,
           "message": "Not found"
           }), 404
@@ -177,7 +276,7 @@ def create_app(test_config=None):
   @app.errorhandler(404)
   def unprocessable_entity(error):
       return jsonify({
-          "success": False, 
+          "success": False,
           "error": 422,
           "message": "Unprocessable Entity"
           }), 422

@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import Column, String, Integer, create_engine
+from sqlalchemy import Column, String, Integer, create_engine , Sequence
 from flask_sqlalchemy import SQLAlchemy
 import json
 from flask_migrate import Migrate
@@ -33,11 +33,13 @@ Question
 class Question(db.Model):  
   __tablename__ = 'questions'
 
-  id = Column(Integer, primary_key=True)
+  id = Column(Integer,primary_key=True) #Sequence('user_id_seq')
   question = Column(String)
   answer = Column(String)
-  category = Column(String)
+  #category = Column(Integer,db.ForeignKey('category.id'))
+  category = Column(Integer)
   difficulty = Column(Integer)
+  
 
   def __init__(self, question, answer, category, difficulty):
     self.question = question
@@ -55,6 +57,11 @@ class Question(db.Model):
   def delete(self):
     db.session.delete(self)
     db.session.commit()
+  
+  def getQuestionsAndCategories(self):
+    data =  db.session.query(Question.id,Question.question,Question.answer,Question.category,Question.difficulty,Category.type).join(Category,Question.category == Category.id)
+
+    return data
 
   def format(self):
     return {
@@ -74,6 +81,7 @@ class Category(db.Model):
 
   id = Column(Integer, primary_key=True)
   type = Column(String)
+  #questions = db.relationship('Question',backref='myCategory')
 
   def __init__(self, type):
     self.type = type

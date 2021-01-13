@@ -20,6 +20,7 @@ class FormView extends Component {
       url: `http://127.0.0.1:5000/api/categories`, //TODO: update request URL
       type: "GET",
       success: (result) => {
+        console.log(result);
         this.setState({ categories: result.categories })
         return;
       },
@@ -34,7 +35,7 @@ class FormView extends Component {
   submitQuestion = (event) => {
     event.preventDefault();
     $.ajax({
-      url: '/questions', //TODO: update request URL
+      url: 'http://127.0.0.1:5000/api/question', //TODO: update request URL
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -44,11 +45,12 @@ class FormView extends Component {
         difficulty: this.state.difficulty,
         category: this.state.category
       }),
-      xhrFields: {
-        withCredentials: true
-      },
+      // xhrFields: {
+      //   withCredentials: true
+      // },
       crossDomain: true,
       success: (result) => {
+        console.log(result);
         document.getElementById("add-question-form").reset();
         return;
       },

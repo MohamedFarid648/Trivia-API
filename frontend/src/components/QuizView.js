@@ -25,6 +25,7 @@ class QuizView extends Component {
       url: `http://127.0.0.1:5000/api/categories`, //TODO: update request URL
       type: "GET",
       success: (result) => {
+        console.log(result);
         this.setState({ categories: result.categories })
         return;
       },
@@ -48,7 +49,7 @@ class QuizView extends Component {
     if(this.state.currentQuestion.id) { previousQuestions.push(this.state.currentQuestion.id) }
 
     $.ajax({
-      url: '/quizzes', //TODO: update request URL
+      url: 'http://127.0.0.1:5000/api/quizzes', //TODO: update request URL
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -56,11 +57,12 @@ class QuizView extends Component {
         previous_questions: previousQuestions,
         quiz_category: this.state.quizCategory
       }),
-      xhrFields: {
-        withCredentials: true
-      },
+      // xhrFields: {
+      //   withCredentials: true
+      // },
       crossDomain: true,
       success: (result) => {
+        console.log(result);
         this.setState({
           showAnswer: false,
           previousQuestions: previousQuestions,
@@ -111,7 +113,7 @@ class QuizView extends Component {
                       key={cat.id}
                       value={cat}
                       className="play-category"
-                      onClick={() => this.selectCategory({type:cat.type})}>
+                      onClick={() => this.selectCategory({type:cat.type,id:cat.id})}>
                       {cat.type}
                     </div>
                   )
