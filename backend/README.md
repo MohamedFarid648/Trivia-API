@@ -18,6 +18,7 @@ Once you have your virtual environment setup and running, install dependencies b
 
 ```bash
 pip install -r requirements.txt
+pip freeze > requirements.txt to update  requirements.txt
 ```
 
 This will install all of the required packages we selected within the `requirements.txt` file.
@@ -70,15 +71,14 @@ REVIEW_COMMENT
 ```
 This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
 ```
-
-Project Documentation : 
-
+#####  Project Documentation : ######  
+ 
 •	Project Title:
         Travia api
         It is a simple project to display categories and questions for each one and play a game for answer the questions .
 
 
-•	Getting Started:
+•	Getting Started (How to install the project):
           install node , pip3 , paython
           in frontend folder run:
                                     npm install --save && npm start
@@ -178,11 +178,33 @@ Project Documentation :
     }
 
 
+    8.If We have an Error :
+    if it is a 404 error  we will send a json response like this :
+          {
+          "success": False,
+          "error": 404,
+          "message": "Not Found"
+          }
+
+
+    if it is a 422 error we will send a json response like this :
+          {
+          "success": False,
+          "error": 422,
+          "message": "Unprocessable Entity : The error occurs when your data is incorrect; or for the lack of better terms, doesn't make logical sense."
+          }
+
+
+
 ## Testing
+You should run app.py or __init__.py in the flaskr folder first
+
 To run the tests, run
 ```
 dropdb trivia_test
 createdb trivia_test
 psql trivia_test < trivia.psql
 python test_flaskr.py
+
+
 ```

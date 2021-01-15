@@ -29,7 +29,7 @@ class TriviaTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = "trivia"
+        self.database_name = "trivia_test"
         self.driver_name ="postgres"
         self.user_name ="mohamed@localhost"
         #self.database_path = "postgres://{driver_name}/{user_name}".format('localhost:5432', self.database_name)
@@ -55,14 +55,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'],False)
 
      #Fauiler : Should be not found error , success:False
-    def test_addQuestionWithError(self):
-        response = requests.post(self.url +'/api/question',json = self.newQuestion)
-        data = response.json()
-        self.assertEqual(data['success'],False)
+    # def test_addQuestionWithError(self):
+    #     response = requests.post(self.url +'/api/question',json = self.newQuestion)
+    #     data = response.json()
+    #     self.assertEqual(data['success'],False)
 
 
     def test_getQuestions(self):
         response = requests.get(self.url +'/questions')
+        #response =self.client().get('/questions')
         data = response.json()
         self.assertTrue(data['questions'])
         self.assertTrue(data['total_questions'])
@@ -83,11 +84,11 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['total_questions'])
         self.assertEqual(data['success'],True)
         
-    def test_deleteQuestion(self):
-        response = requests.delete(self.url +'/questions/19')
+    # def test_deleteQuestion(self):
+    #     response = requests.delete(self.url +'/questions/19')
         
-        data = response.json()
-        self.assertEqual(data['success'],True)
+    #     data = response.json()
+    #     self.assertEqual(data['success'],True)
 
     def test_getQuestionsByCategories(self):
         response = requests.get(self.url +'/categories/1/questions')
