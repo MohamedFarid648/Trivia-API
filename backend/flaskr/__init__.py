@@ -58,21 +58,31 @@ def create_app(test_config=None):
   def getQuestions():
     page = request.args.get('page', 1, type=int)
     # 2 elements for every page
-    start = (page - 1) * QUESTIONS_PER_PAGE
-    end = start + QUESTIONS_PER_PAGE
-    questions = Question.query.all()
-    categories = Category.query.all()
+    # start = (page - 1) * QUESTIONS_PER_PAGE
+    # end = start + QUESTIONS_PER_PAGE
 
-    formated_questions = [q.format() for q in questions]
-    formated_category = [c.format() for c in categories]
+    try:
+      questions =  Question.query.paginate(page, QUESTIONS_PER_PAGE, False) #Question.query.all()
+      categories = Category.query.all()
 
-    return jsonify({
-      'success':True,
-      'questions':formated_questions[start:end],
-      'total_questions':len(formated_questions),
-      'categories':formated_category,
-      'currentCategory':{}
-      })
+      formated_category = [c.format() for c in categories]
+      formated_questions = [q.format() for q in questions.items]
+
+
+      total = questions.total
+
+      return jsonify({
+        'success':True,
+        'questions':formated_questions,
+        'total_questions':total,
+        'categories':formated_category,
+        'currentCategory':{}
+        })
+    
+    except Exception as e:
+        abort(422)
+        # abort(422,"Unprocessable Entity : The error occurs when your data is incorrect; or for the lack of better terms, doesn't make logical sense.")
+        print(e)
 
   @app.route('/api/categories', methods=['GET'])
   @cross_origin()
@@ -109,8 +119,8 @@ def create_app(test_config=None):
               'success':True,
         })
     except Exception as e:
-        # abort(422)
         print(e)
+        abort(422)
  
   '''
   @TODO: 
@@ -255,17 +265,23 @@ def create_app(test_config=None):
     print(previousQuestions)
     print(question)
 
-    # count = len(formated_questions)
-    # while count > 0:
-    #   for q in previousQuestions:
-    #     question = random.choice(formated_questions)
-    #     count = count - 1
-    #     if(q == question['id']):
-    #       canSendit = False
+    count = len(formated_questions)
 
-    for q in previousQuestions:
-      if(q == question['id']):
-        canSendit = False
+    while count > 0:
+      print(count)
+      count -= 1
+
+      if(question['id'] in previousQuestions):
+          canSendit = False
+          question = random.choice(formated_questions)
+          print(question)
+      else:
+          canSendit = True
+          break
+
+      if(len(previousQuestions) == len(formated_questions)):
+          canSendit = False
+          break
 
     if(canSendit):
       return jsonify({
@@ -290,7 +306,7 @@ def create_app(test_config=None):
       return jsonify({
           "success": False,
           "error": 404,
-          "message": "Not Found"
+          "message": error.description
           }), 404
 
   @app.errorhandler(422)
@@ -298,7 +314,8 @@ def create_app(test_config=None):
       return jsonify({
           "success": False,
           "error": 422,
-          "message": "Unprocessable Entity : The error occurs when your data is incorrect; or for the lack of better terms, doesn't make logical sense."
+          "message":"Unprocessable Entity : The error occurs when your data is incorrect; or for the lack of better terms, doesn't make logical sense."
+           #error.description
           }), 422
 
   return app

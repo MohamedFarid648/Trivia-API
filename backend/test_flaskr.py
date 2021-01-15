@@ -54,11 +54,11 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['message'],'Not Found')
         self.assertEqual(data['success'],False)
 
-     #Fauiler : Should be not found error , success:False
-    # def test_addQuestionWithError(self):
-    #     response = requests.post(self.url +'/api/question',json = self.newQuestion)
-    #     data = response.json()
-    #     self.assertEqual(data['success'],False)
+        #     Fauiler : Should be not found error , success:False
+        #     def test_addQuestionWithError(self):
+        #     response = requests.post(self.url +'/api/question',json = self.newQuestion)
+        #     data = response.json()
+        #     self.assertEqual(data['success'],False)
 
 
     def test_getQuestions(self):
