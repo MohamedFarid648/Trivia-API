@@ -255,17 +255,26 @@ def create_app(test_config=None):
     print(previousQuestions)
     print(question)
 
-    # count = len(formated_questions)
-    # while count > 0:
-    #   for q in previousQuestions:
-    #     question = random.choice(formated_questions)
-    #     count = count - 1
-    #     if(q == question['id']):
-    #       canSendit = False
+    count = len(formated_questions)
 
-    for q in previousQuestions:
-      if(q == question['id']):
-        canSendit = False
+    while count > 0:
+      print(count)
+      count -= 1
+
+
+      if(question['id'] in previousQuestions):
+          canSendit = False
+          question = random.choice(formated_questions)
+          print(question)
+      else:
+          canSendit = True
+          break
+
+      if(len(previousQuestions) == len(formated_questions)):
+          canSendit = False
+          break
+
+        
 
     if(canSendit):
       return jsonify({
