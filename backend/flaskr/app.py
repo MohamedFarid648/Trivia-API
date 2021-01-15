@@ -71,7 +71,7 @@ def create_app(test_config=None):
       'questions':formated_questions[start:end],
       'total_questions':len(formated_questions),
       'categories':formated_category,
-       'currentCategory':{}
+      'currentCategory':{}
       })
 
   @app.route('/api/categories', methods=['GET'])
@@ -94,16 +94,17 @@ def create_app(test_config=None):
   This removal will persist in the database and when you refresh the page. 
   '''
 
-  @app.route('/api/question/<int:id>', methods=['DELETE'])
+  @app.route('/api/questions/<int:question_id>', methods=['DELETE'])
   @cross_origin()
-  def delete_question(id):
-    question = Question.query.filter_by(id=id).one_or_none()
+  def delete_question(question_id):
+    # question = Question.query.get(id=question_id).one_or_none()
 
-    if(question is None):
-        abort(404)
+    # if(question is None):
+    #     abort(404)
 
     try:
-        question.delete(question)
+        question = Question.query.get(question_id)
+        Question.delete(question)        
         return jsonify({
               'success':True,
         })
@@ -162,7 +163,7 @@ def create_app(test_config=None):
 
   @app.route('/api/questions/search', methods=['POST'])
   @cross_origin()
-  def search_artists():
+  def search_questions():
 
     searchTerm = request.get_json().get('searchTerm')
     res = Question.query.filter(Question.question.ilike("%" + searchTerm + "%")).all()
@@ -289,15 +290,15 @@ def create_app(test_config=None):
       return jsonify({
           "success": False,
           "error": 404,
-          "message": "Not found"
+          "message": "Not Found"
           }), 404
 
-  @app.errorhandler(404)
+  @app.errorhandler(422)
   def unprocessable_entity(error):
       return jsonify({
           "success": False,
           "error": 422,
-          "message": "Unprocessable Entity"
+          "message": "Unprocessable Entity : The error occurs when your data is incorrect; or for the lack of better terms, doesn't make logical sense."
           }), 422
 
   return app

@@ -69,25 +69,113 @@ One note before you delve into your tasks: for each endpoint you are expected to
 REVIEW_COMMENT
 ```
 This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
-
-Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
-
-GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
-- Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
-
 ```
+
+Project Documentation : 
+
+•	Project Title:
+        Travia api
+        It is a simple project to display categories and questions for each one and play a game for answer the questions .
+
+
+•	Getting Started:
+          install node , pip3 , paython
+          in frontend folder run:
+                                    npm install --save && npm start
+          in backend folder run :
+                                    pip install -r requirements.txt
+                                    set FLASK_APP=flaskr
+                                    set FLASK_ENV=development
+                                    flask run
+
+•	API Reference (Endpoints):
+
+    1.GET '/api/categories'
+    - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+    - Request Arguments: None
+    - Returns: An object with a single key, categories, that contains an object of id: category_string key:value pairs. 
+    {'1' : "Science",
+    '2' : "Art",
+    '3' : "Geography",
+    '4' : "History",
+    '5' : "Entertainment",
+    '6' : "Sports"}
+
+    2.GET '/api/questions'
+    - Return all questions with pagination
+    - Request Arguments: pageNumber( 1 is default)
+    - Returns: All Questions with pagination and All Categories. 
+    questions:[
+    {answer: "Maya Angelou", category: 1, difficulty: 4, id: 1, question: "Whose autobiography is entitled I Know Why the Caged Bird Sings?"},
+    {answer: "Muhammad Ali", category: 1, difficulty: 4, id: 2, question: "What boxer s original name is Cassius Clay?"},
+    {answer: "Apollo 13", category: 1, difficulty: 5, id: 3, question: "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"},
+    {answer: "Tom Cruise", category: 1, difficulty: 6, id: 4, question: "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"},
+    {answer: "ww", category: 1, difficulty: 1, id: 16, question: "rr"}]
+    success: true,
+    total_questions: 5}
+
+    3.DELETE '/api/question/<int:id>'
+    -  Delete Question depends on its id
+    - Request Arguments:Question Id
+    - Return {'success' :True} if the question is deleted
+
+    4.POST '/api/question'
+    -  Add New Question
+    - Request Arguments:Question Object(question,answer,category,difficulty)
+    - Return {'success' :True} if the question is inserted 
+    and {'success' :False } if one of the values is empty
+
+    5.POST '/api/questions/search'
+    -  Search for  a question(s) using  string value
+    - Request Arguments:Question Value as string
+    - Return the questions that have a specific value
+    Ex:If we search for a Whose value it will Return : 
+    {     'success':True,
+        'questions':
+            [{answer: "Maya Angelou"
+            category: 1
+            difficulty: 4
+            id: 1
+            question: "Whose autobiography is entitled I Know Why the Caged Bird Sings?"
+            }],
+        'total_questions':1,
+        'currentCategory':{}
+    }
+
+
+    6.GET '/api/categories/<int:id>/questions'
+    - Return all questions for a specific category
+    - Request Arguments: Category ID
+    - Returns: All Questions For this Category. 
+    {
+    currentCategory:{id: 1 , type: "science"}
+    questions:[
+    {answer: "Maya Angelou", category: 1, difficulty: 4, id: 1, question: "Whose autobiography is entitled I Know Why the Caged Bird Sings?"},
+    {answer: "Muhammad Ali", category: 1, difficulty: 4, id: 2, question: "What boxer s original name is Cassius Clay?"},
+    {answer: "Apollo 13", category: 1, difficulty: 5, id: 3, question: "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"},
+    {answer: "Tom Cruise", category: 1, difficulty: 6, id: 4, question: "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"},
+    {answer: "ww", category: 1, difficulty: 1, id: 16, question: "rr"}]
+    success: true,
+    total_questions: 5}
+
+
+    7.POST '/api/quizzes'
+    -  Get a random question for a specific category but not in perviues questions
+    - Request Arguments: 
+            PreviousQuestions: The Questions that user answered before
+            quizCategory : Current Category or All(id=0)
+
+    - Return the question that should be answered or {'success':False} if all questions have been answered
+
+    Ex:If we choose science category : for a Whose value it will Return : 
+    { 
+            answer: "Apollo 13"
+            category: 1
+            difficulty: 5
+            id: 3
+            question: "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+            success: true
+    }
 
 
 ## Testing

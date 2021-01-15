@@ -71,7 +71,7 @@ def create_app(test_config=None):
       'questions':formated_questions[start:end],
       'total_questions':len(formated_questions),
       'categories':formated_category,
-       'currentCategory':{}
+      'currentCategory':{}
       })
 
   @app.route('/api/categories', methods=['GET'])
@@ -94,16 +94,17 @@ def create_app(test_config=None):
   This removal will persist in the database and when you refresh the page. 
   '''
 
-  @app.route('/api/question/<int:id>', methods=['DELETE'])
+  @app.route('/api/questions/<int:question_id>', methods=['DELETE'])
   @cross_origin()
-  def delete_question(id):
-    question = Question.query.filter_by(id=id).one_or_none()
+  def delete_question(question_id):
+    # question = Question.query.get(id=question_id).one_or_none()
 
-    if(question is None):
-        abort(404)
+    # if(question is None):
+    #     abort(404)
 
     try:
-        question.delete(question)
+        question = Question.query.get(question_id)
+        Question.delete(question)        
         return jsonify({
               'success':True,
         })
@@ -127,7 +128,7 @@ def create_app(test_config=None):
   def add_question():
     try:
       # formData = Question(request.get_json().get('question'),request.get_json().get('answer'),request.get_json().get('category'),request.get_json().get('difficulty'))
-      formData = Question('','',0,0)
+      formData = Question('', '', 0, 0)
       formData.question = request.get_json().get('question')
       formData.category = request.get_json().get('category')
       formData.answer = request.get_json().get('answer')
@@ -162,7 +163,7 @@ def create_app(test_config=None):
 
   @app.route('/api/questions/search', methods=['POST'])
   @cross_origin()
-  def search_artists():
+  def search_questions():
 
     searchTerm = request.get_json().get('searchTerm')
     res = Question.query.filter(Question.question.ilike("%" + searchTerm + "%")).all()
@@ -190,7 +191,7 @@ def create_app(test_config=None):
   def getQuestionsOfCategory(id):
     questions = Question.getQuestionsAndCategories({}).filter(Category.id == id).all()
     currentCategory = Category.query.get(id)
-    #print(questions)
+    # print(questions)
 
     formated_questions = []
     for q in questions:
@@ -203,7 +204,7 @@ def create_app(test_config=None):
     })
 
     # formated_questions = [q.format() for q in questions]
-    #print(formated_questions)
+    # print(formated_questions)
 
     return jsonify({
       'success':True,
@@ -230,12 +231,12 @@ def create_app(test_config=None):
 
     previousQuestions = request.get_json().get('previous_questions')
     quizCategory = request.get_json().get('quiz_category')
-    print(previousQuestions)
     print(quizCategory)
 
-    questions = Question.getQuestionsAndCategories({}).filter(Category.id == quizCategory['id']).all()
-    
-    print(questions)
+    if(quizCategory['id'] == 0):
+       questions = Question.getQuestionsAndCategories({}).all()
+    else:
+       questions = Question.getQuestionsAndCategories({}).filter(Category.id == quizCategory['id']).all()
     
     formated_questions = []
     for q in questions:
@@ -248,17 +249,36 @@ def create_app(test_config=None):
     })
 
     question = random.choice(formated_questions)
-    print(formated_questions)
+
+    canSendit = True
+
+    print(previousQuestions)
     print(question)
-    #for q in previousQuestions:
 
-   
-    # formated_questions = [q.format() for q in questions]
+    # count = len(formated_questions)
+    # while count > 0:
+    #   for q in previousQuestions:
+    #     question = random.choice(formated_questions)
+    #     count = count - 1
+    #     if(q == question['id']):
+    #       canSendit = False
 
-    return jsonify({
-      'success':True,
-      'currentQuestion':{}
-      })
+    for q in previousQuestions:
+      if(q == question['id']):
+        canSendit = False
+
+    if(canSendit):
+      return jsonify({
+        'success':True,
+        'question':question
+        })
+    else:
+      return jsonify({
+        'success':False,
+        'question':'',
+        'message':'You answered all questions'
+        })
+
   '''
   @TODO: 
   Create error handlers for all expected errors 
@@ -270,15 +290,15 @@ def create_app(test_config=None):
       return jsonify({
           "success": False,
           "error": 404,
-          "message": "Not found"
+          "message": "Not Found"
           }), 404
 
-  @app.errorhandler(404)
+  @app.errorhandler(422)
   def unprocessable_entity(error):
       return jsonify({
           "success": False,
           "error": 422,
-          "message": "Unprocessable Entity"
+          "message": "Unprocessable Entity : The error occurs when your data is incorrect; or for the lack of better terms, doesn't make logical sense."
           }), 422
 
   return app

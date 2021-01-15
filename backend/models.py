@@ -5,8 +5,10 @@ import json
 from flask_migrate import Migrate
 
 database_name = "trivia"
+driver_name ="postgres"
+user_name ="mohamed@localhost"
 #database_path = "postgres://{}/{}".format('localhost:5432', database_name)
-database_path = 'postgresql://postgres:mohamed@localhost:5432/trivia'
+database_path = 'postgresql://'+driver_name+':'+user_name+':5432/'+database_name
 
 db = SQLAlchemy()
  
@@ -33,7 +35,7 @@ Question
 class Question(db.Model):  
   __tablename__ = 'questions'
 
-  id = Column(Integer,primary_key=True) #Sequence('user_id_seq')
+  id = Column(Integer,primary_key=True) #Sequence('question_id_seq')
   question = Column(String)
   answer = Column(String)
   #category = Column(Integer,db.ForeignKey('category.id'))
