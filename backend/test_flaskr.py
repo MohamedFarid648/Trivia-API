@@ -29,7 +29,7 @@ class TriviaTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = "trivia_test"
+        self.database_name = "trivia"
         self.driver_name ="postgres"
         self.user_name ="mohamed@localhost"
         #self.database_path = "postgres://{driver_name}/{user_name}".format('localhost:5432', self.database_name)
@@ -62,24 +62,24 @@ class TriviaTestCase(unittest.TestCase):
 
 
     def test_getQuestions(self):
-        response = requests.get(self.url +'/questions')
-        #response =self.client().get('/questions')
-        data = response.json()
+        #response = requests.get(self.url +'/questions')
+        response = self.client().get('/api/questions')
+        data = json.loads(response.data)
         self.assertTrue(data['questions'])
         self.assertTrue(data['total_questions'])
         self.assertEqual(data['success'],True)
 
     def test_getCategories(self):
-        response = requests.get(self.url +'/categories')
-        data = response.json()
+        response = self.client().get('/api/categories')
+        data = json.loads(response.data)
         self.assertTrue(data['categories'])
         self.assertTrue(data['total_categories'])
         self.assertEqual(data['success'],True)
 
     
     def test_searchQuestion(self):
-        response = requests.post(self.url +'/questions/search',json = {'searchTerm':'is'})
-        data = response.json()
+        response = self.client().post('/api/questions/search',json = {'searchTerm':'is'})
+        data = json.loads(response.data)
         self.assertTrue(data['questions'])
         self.assertTrue(data['total_questions'])
         self.assertEqual(data['success'],True)
@@ -91,24 +91,21 @@ class TriviaTestCase(unittest.TestCase):
     #     self.assertEqual(data['success'],True)
 
     def test_getQuestionsByCategories(self):
-        response = requests.get(self.url +'/categories/1/questions')
-        
-        data = response.json()
+        response = self.client().get('/api/categories/1/questions')
+        data =json.loads(response.data)
         self.assertTrue(data['questions'])
         self.assertTrue(data['total_questions'])
         self.assertTrue(data['currentCategory'])
         self.assertEqual(data['success'],True)
 
     def test_addQuestion(self):
-        response = requests.post(self.url +'/question',json = self.newQuestion)
-        
-        data = response.json()
+        response = self.client().post('/api/question',json = self.newQuestion)
+        data = json.loads(response.data)
         self.assertEqual(data['success'],True)
 
     def test_quizzes(self):
-        response = requests.post(self.url +'/quizzes',json = self.quiz_request)
-        
-        data = response.json()
+        response = self.client().post('/api/quizzes',json = self.quiz_request)
+        data = json.loads(response.data)
         self.assertTrue(data['question'])
         self.assertEqual(data['success'],True)
 

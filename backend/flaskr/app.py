@@ -16,7 +16,7 @@ def create_app(test_config=None):
   # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
   setup_db(app)
-  cors = CORS(app, resources={"*": {"origins": "*"}})
+  cors = CORS(app, resources={r"*": {"origins": "*"}})
   
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
@@ -143,7 +143,7 @@ def create_app(test_config=None):
       formData.category = request.get_json().get('category')
       formData.answer = request.get_json().get('answer')
       formData.difficulty = request.get_json().get('difficulty')
-      print(formData.question)
+      #print(formData.question)
 
       if(formData.question and formData.answer and formData.category and formData.difficulty):
         Question.insert(formData)
@@ -199,7 +199,8 @@ def create_app(test_config=None):
   @app.route('/api/categories/<int:id>/questions', methods=['GET'])
   @cross_origin()
   def getQuestionsOfCategory(id):
-    questions = Question.getQuestionsAndCategories({}).filter(Category.id == id).all()
+    question = Question('', '', 0, 0)
+    questions = Question.getQuestionsAndCategories(question).filter(Category.id == id).all()
     currentCategory = Category.query.get(id)
     # print(questions)
 
@@ -239,14 +240,15 @@ def create_app(test_config=None):
   @cross_origin()
   def getQuiz():
 
+    question = Question('', '', 0, 0)
     previousQuestions = request.get_json().get('previous_questions')
     quizCategory = request.get_json().get('quiz_category')
     print(quizCategory)
 
     if(quizCategory['id'] == 0):
-       questions = Question.getQuestionsAndCategories({}).all()
+       questions = Question.getQuestionsAndCategories(question).all()
     else:
-       questions = Question.getQuestionsAndCategories({}).filter(Category.id == quizCategory['id']).all()
+       questions = Question.getQuestionsAndCategories(question).filter(Category.id == quizCategory['id']).all()
     
     formated_questions = []
     for q in questions:
